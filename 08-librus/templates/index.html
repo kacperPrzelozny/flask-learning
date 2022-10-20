@@ -3,7 +3,11 @@
 {% block title %} {{title}} {% endblock %}
 
 {% block navbar %}
+    {%  if userLogin %}
+    {% include "includes/navbar-logged.html" %}
+    {% else %}
     {% include "includes/navbar.html" %}
+    {% endif %}
 {% endblock %}
 
 {% block content %}

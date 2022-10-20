@@ -3,9 +3,30 @@
 {% block title %} {{title}} {% endblock %}
 
 {% block navbar %}
+    {%  if userLogin %}
+    {% include "includes/navbar-logged.html" %}
+    {% else %}
     {% include "includes/navbar.html" %}
+    {% endif %}
 {% endblock %}
 
 {% block content %}
-
+    <div class="container mt-2">
+      {% if userLogin %}
+        <h1>Jesteś zalogowany jako {{ userLogin }}</h1>
+      {% else %}
+        <div class="row">
+            <div class="col-lg-4 offset-lg-4">
+                <form action="/login" method="post">
+                    {{ form.hidden_tag() }}
+                    {{ form.userLogin.label(class_="form-label") }}
+                    {{ form.userLogin(class_="form-control") }}
+                    {{ form.userPassword.label(class_="form-label") }}
+                    {{ form.userPassword(class_="form-control") }}
+                    {{ form.submit(class_="btn btn-dark mt-3 float-end") }}
+                </form>
+            </div>
+        </div>
+        {% endif %}
+    </div>
 {% endblock %}

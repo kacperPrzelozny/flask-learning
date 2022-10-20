@@ -1,16 +1,31 @@
 from flask import Flask, render_template, request, session, redirect, flash, url_for
 from flask_bs4 import Bootstrap
 from flask_moment import Moment
-from datetime import datetime
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, IntegerField
+from wtforms import StringField, SubmitField, PasswordField
 from wtforms.validators import DataRequired
-import math
 
 app: Flask = Flask(__name__)
 bootstrap = Bootstrap(app)
 moment = Moment(app)
 app.config['SECRET_KEY'] = 'sdfsfsafafahehwf52341eqf21ACAB'
+
+
+class LoginForm(FlaskForm):
+    """formularz logowania"""
+    userLogin = StringField('Login:', validators=[DataRequired()])
+    userPassword = PasswordField('Hasło:', validators=[DataRequired()])
+    submit = SubmitField('Zaloguj')
+
+
+users = {
+    1: {
+        'login': 'kprzelozny',
+        'password': 'Qwerty123',
+        'firstName': 'Kacper',
+        'lastName': 'Przełożny'
+    }
+}
 
 
 @app.route('/')
@@ -20,9 +35,32 @@ def index():
         title='Strona główna',
     )
 
-@app.route('/login')
+
+@app.route('/login', methods=['POST', 'GET'])
 def login():
-    return render_template('login.html', title='Logowanie')
+    loginForm = LoginForm()
+    if loginForm.validate_on_submit():
+        userLogin = loginForm.userLogin.data
+        userPassword = loginForm.userPassword.data
+        if userLogin == users[1]['login'] and userPassword == users[1]['password']:
+            session['userLogin'] = userLogin
+            return redirect('dashboard')
+    return render_template(
+        'login.html',
+        title='Logowanie',
+        form=loginForm,
+        userLogin=session.get('userLogin')
+    )
+
+@app.route('/logout')
+def logout():
+    session.pop('userLogin')
+    return redirect('login')
+
+@app.route('/dashboard')
+def dashboard():
+    return render_template('dashboard.html', userLogin=session.get('userLogin'))
+
 
 @app.errorhandler(404)
 def pageNotFound(error):

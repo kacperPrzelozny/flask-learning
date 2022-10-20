@@ -1,0 +1,27 @@
+{% extends "bootstrap/base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+{% block title %} {{title}} {% endblock %}
+
+{% block navbar %}
+    {% include "includes/navbar.html" %}
+{% endblock %}
+
+{% block content %}
+<div class="container mt-3">
+    {% if avg %}
+        <p>Wartość minimalna: {{ min }}</p>
+        <p>Wartość maksymalna: {{ max }}</p>
+        <p>Średnia: {{ avg }}</p>
+        <p>Liczby malejące: {{ reversed_array }}</p>
+
+    {% endif %}
+    <form method="post" action="/ciag">
+        <div class="mb-3 mt-3">
+            {{ form.hidden_tag() }}
+            {{ form.a.label(class_="form-label") }}
+            {{ form.a(class_="form-control mb-3", value_=a) }}
+            {{ form.submit(class_="btn btn-success") }}
+        </div>
+    </form>
+</div>
+{% endblock %}

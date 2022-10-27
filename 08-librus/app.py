@@ -1,6 +1,9 @@
+import json
+
 from flask import Flask, render_template, request, session, redirect, flash, url_for
 from flask_bs4 import Bootstrap
 from flask_moment import Moment
+from datetime import datetime
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, PasswordField
 from wtforms.validators import DataRequired
@@ -8,6 +11,7 @@ from wtforms.validators import DataRequired
 app: Flask = Flask(__name__)
 bootstrap = Bootstrap(app)
 moment = Moment(app)
+date = datetime.now()
 app.config['SECRET_KEY'] = 'sdfsfsafafahehwf52341eqf21ACAB'
 
 
@@ -33,6 +37,7 @@ def index():
     return render_template(
         'index.html',
         title='Strona główna',
+        date=date
     )
 
 
@@ -49,7 +54,8 @@ def login():
         'login.html',
         title='Logowanie',
         form=loginForm,
-        userLogin=session.get('userLogin')
+        userLogin=session.get('userLogin'),
+        date=date
     )
 
 @app.route('/logout')
@@ -59,7 +65,10 @@ def logout():
 
 @app.route('/dashboard')
 def dashboard():
-    return render_template('dashboard.html', userLogin=session.get('userLogin'))
+    with open('data/grades.json') as gradesFiles:
+        grades = json.load(gradesFiles)
+        gradesFiles.close()
+    return render_template('dashboard.html', userLogin=session.get('userLogin'), date=date, grades=grades)
 
 
 @app.errorhandler(404)

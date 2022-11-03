@@ -22,6 +22,33 @@ class LoginForm(FlaskForm):
     submit = SubmitField('Zaloguj')
 
 
+def average(subjectValue, termValue):
+    """funkcja licząca średnią ocen"""
+    with open("data/grades.json") as gradesFile:
+        grades = json.load(gradesFile)
+        gradesFile.close()
+    sum = 0
+    len = 0
+    if subjectValue == "" and termValue == "":
+        for subject, terms in grades.items():
+            for term, categories in terms.items():
+                for category, grades in categories.items():
+                    if category in ['answear', 'quiz', 'test']:
+                        for grade in grades:
+                            sum += grade
+                            len += 1
+    else:
+        for subject, terms in grades.items():
+            if subject == subjectValue:
+                for term, categories in terms.items():
+                    if term == termValue:
+                        for category, grades in categories.items():
+                            if category in ['answear', 'quiz', 'test']:
+                                for grade in grades:
+                                    sum += grade
+                                    len += 1
+    return round(sum/len, 2)
+
 users = {
     1: {
         'login': 'kprzelozny',
@@ -58,17 +85,19 @@ def login():
         date=date
     )
 
+
 @app.route('/logout')
 def logout():
     session.pop('userLogin')
     return redirect('login')
+
 
 @app.route('/dashboard')
 def dashboard():
     with open('data/grades.json') as gradesFiles:
         grades = json.load(gradesFiles)
         gradesFiles.close()
-    return render_template('dashboard.html', userLogin=session.get('userLogin'), date=date, grades=grades)
+    return render_template('dashboard.html', userLogin=session.get('userLogin'), date=date, grades=grades, countAverage=average)
 
 
 @app.errorhandler(404)

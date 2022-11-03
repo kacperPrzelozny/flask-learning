@@ -3,12 +3,12 @@
     <tr>
       <th>Nazwa Przedmiotu</th>
       <th>Oceny - pierwszy semestr</th>
-      <th>Średnia</th>
-      <th>Ocena śródroczna</th>
+      <th class="text-center">Średnia</th>
+      <th class="text-center">Ocena śródroczna</th>
       <th>Oceny - drugi semestr</th>
-      <th>Średnia</th>
-      <th>Ocena śródroczna</th>
-      <th>Ocena roczna</th>
+      <th class="text-center">Średnia</th>
+      <th class="text-center">Ocena śródroczna</th>
+      <th class="text-center">Ocena roczna</th>
     </tr>
   </thead>
   <tbody>
@@ -34,10 +34,10 @@
                 {% endif %}
               {% endfor %}
             </td>
-            <td>
-              średnia
+            <td class="text-center">
+              {{ countAverage(subject,term) }}
             </td>
-            <td>
+            <td class="text-center">
               {% for category, interim in categories.items() %}
                 {% if category == 'interim' %}
                   <span class="badge bg-dark">{{ interim }}</span>
@@ -62,10 +62,10 @@
                 {% endif %}
               {% endfor %}
             </td>
-            <td>
-              średnia
+            <td class="text-center">
+              {{ countAverage(subject,term) }}
             </td>
-            <td>
+            <td class="text-center">
               {% for category, interim in categories.items() %}
                 {% if category == 'interim' %}
                   <span class="badge bg-dark">{{ interim }}</span>
@@ -75,7 +75,7 @@
             <td>
               {% for category, yearly in categories.items() %}
                 {% if category == 'yearly' %}
-                  <span class="badge bg-dark">{{ yearly }}</span>
+                  <span class="badge bg-success">{{ yearly }}</span>
                 {% endif %}
               {% endfor %}
             </td>

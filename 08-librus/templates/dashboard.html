@@ -91,8 +91,8 @@
                        </div>
                        <div class="card-body">
                            <p class="lead text-success">
-                               Informatyka <span class="badge bg-success">4,1</span>
-                               Matematyka <span class="badge bg-success">3,8</span>
+                               {{ highestName() | title }}&nbsp;<span class="badge bg-success">{{ highestAverage() }}</span>
+                               {{ secondHighestName() | title }}&nbsp;<span class="badge bg-success">{{ secondHighestAverage() }}</span>
                            </p>
                        </div>
                    </div>
@@ -104,7 +104,7 @@
                        </div>
                        <div class="card-body">
                            <p class="lead text-danger">
-                                chemia, plastyka
+                               {{under2()}}
                            </p>
                        </div>
                    </div>

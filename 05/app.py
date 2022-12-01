@@ -18,7 +18,7 @@ def index():
 
 @app.route('/user/<name>')
 def user(name):
-    return render_template('index.html', title='Użytkownik', name=name)
+    return render_template('weather.html', title='Użytkownik', name=name)
 
 @app.errorhandler(404)
 def pageNotFound(error):

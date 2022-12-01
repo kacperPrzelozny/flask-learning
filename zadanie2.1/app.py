@@ -26,7 +26,7 @@ class ArrayForm(FlaskForm):
 def index():
     form = ArrayForm()
     return render_template(
-        'index.html',
+        'weather.html',
         title='Ciąg liczb',
         form=form
     )
@@ -39,7 +39,7 @@ def oblicz():
     desired_array.sort(reverse=True)
     minimum = min(desired_array)
     maximum = max(desired_array)
-    return render_template('index.html', avg=avg, reversed_array=desired_array, min=minimum, max=maximum, a=request.form['a'], form=ArrayForm())
+    return render_template('weather.html', avg=avg, reversed_array=desired_array, min=minimum, max=maximum, a=request.form['a'], form=ArrayForm())
 
 
 @app.errorhandler(404)

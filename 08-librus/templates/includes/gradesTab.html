@@ -8,6 +8,7 @@
       <th>Oceny - drugi semestr</th>
       <th class="text-center">Średnia</th>
       <th class="text-center">Ocena śródroczna</th>
+      <th class="text-center">Średnia roczna</th>
       <th class="text-center">Ocena roczna</th>
     </tr>
   </thead>
@@ -72,7 +73,10 @@
                 {% endif %}
               {% endfor %}
             </td>
-            <td>
+            <td class="text-center">
+                  {{ countAverage(subject, "") }}
+            </td>
+            <td class="text-center">
               {% for category, yearly in categories.items() %}
                 {% if category == 'yearly' %}
                   <span class="badge bg-success">{{ yearly }}</span>

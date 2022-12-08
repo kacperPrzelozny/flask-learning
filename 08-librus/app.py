@@ -1,3 +1,4 @@
+import hashlib
 import json
 
 from flask import Flask, render_template, request, session, redirect, flash, url_for
@@ -5,7 +6,7 @@ from flask_bs4 import Bootstrap
 from flask_moment import Moment
 from datetime import datetime
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, PasswordField
+from wtforms import StringField, SubmitField, PasswordField, SelectField, RadioField
 from wtforms.validators import DataRequired
 
 app: Flask = Flask(__name__)
@@ -21,6 +22,25 @@ class LoginForm(FlaskForm):
     userPassword = PasswordField('Hasło:', validators=[DataRequired()])
     submit = SubmitField('Zaloguj')
 
+
+class SubjectForm(FlaskForm):
+    subject = StringField('Nazwa przedmiotu:', validators=[DataRequired()])
+    submit = SubmitField('Dodaj')
+
+
+class GradeForm(FlaskForm):
+    subject = SelectField('Wybierz przedmiot:', choices=str)
+    term = RadioField('Wybierz semestr:', choices=[('term1', 'Semestr 1'), ('term2', 'Semestr 2')])
+    category = SelectField('Wybierz kategorię:', choices=[('quiz', 'Kartkówka'), ('answear', 'Odpowiedź'), ('test', 'Sprawdzian')])
+    grade = SelectField('Ocena', choices=[
+        (6, 'Celujący'),
+        (5, 'Bardzo dobry'),
+        (4, 'Dobry'),
+        (3, 'Dostateczny'),
+        (2, 'Dopuszczający'),
+        (1, 'Niedostateczny'),
+    ])
+    submit = SubmitField('Dodaj')
 
 def average(subjectValue, termValue):
     """funkcja licząca średnią ocen"""
@@ -41,11 +61,11 @@ def average(subjectValue, termValue):
         for subject, terms in grades.items():
             if subject == subjectValue:
                 for term, categories in terms.items():
-                        for category, grades in categories.items():
-                            if category in ['answear', 'quiz', 'test']:
-                                for grade in grades:
-                                    sum += grade
-                                    len += 1
+                    for category, grades in categories.items():
+                        if category in ['answear', 'quiz', 'test']:
+                            for grade in grades:
+                                sum += grade
+                                len += 1
     else:
         for subject, terms in grades.items():
             if subject == subjectValue:
@@ -56,8 +76,10 @@ def average(subjectValue, termValue):
                                 for grade in grades:
                                     sum += grade
                                     len += 1
-    return round(sum / len, 2)
-
+    if len != 0:
+        return round(sum / len, 2)
+    else:
+        return 0
 
 def highestAverage():
     """funkcja wyznaczająca najwyższą średnią ocen"""
@@ -70,6 +92,8 @@ def highestAverage():
         if avg > subjectAverage:
             subjectAverage = avg
     return subjectAverage
+
+
 def highestName():
     """funkcja wyznaczająca najwyższą średnią ocen"""
     with open("data/grades.json") as gradesFile:
@@ -84,6 +108,7 @@ def highestName():
             subjectName = subject
     return subjectName
 
+
 def secondHighestAverage():
     highestAvg = highestAverage()
     """funkcja wyznaczająca drugą najwyższą średnią ocen"""
@@ -96,6 +121,8 @@ def secondHighestAverage():
         if subjectAverage < avg < highestAvg:
             subjectAverage = avg
     return subjectAverage
+
+
 def secondHighestName():
     """funkcja wyznaczająca drugą najwyższą średnią ocen"""
     highestAvg = highestAverage()
@@ -111,6 +138,7 @@ def secondHighestName():
             subjectName = subject
     return subjectName
 
+
 def under2():
     """funkcja wyznaczająca zagrozenia"""
     with open("data/grades.json") as gradesFile:
@@ -119,7 +147,7 @@ def under2():
     subjectsName = ''
     for subject, terms in grades.items():
         avg = average(subject, "")
-        if avg < 2:
+        if avg < 2 and avg != 0:
             subjectsName = subjectsName + subject + ","
     if subjectsName == '':
         return 'Brak'
@@ -129,7 +157,7 @@ def under2():
 users = {
     1: {
         'login': 'kprzelozny',
-        'password': 'Qwerty123',
+        'password': '77aae185203edc6357676db95caa25d0f398d402c1723e6a7b42cfe8d2967f2e',
         'firstName': 'Kacper',
         'lastName': 'Przełożny'
     }
@@ -151,6 +179,8 @@ def login():
     if loginForm.validate_on_submit():
         userLogin = loginForm.userLogin.data
         userPassword = loginForm.userPassword.data
+        userPassword = userPassword.encode()
+        userPassword = hashlib.sha256(userPassword).hexdigest()
         if userLogin == users[1]['login'] and userPassword == users[1]['password']:
             session['userLogin'] = userLogin
             return redirect('dashboard')
@@ -175,8 +205,36 @@ def dashboard():
         grades = json.load(gradesFiles)
         gradesFiles.close()
     return render_template('dashboard.html', userLogin=session.get('userLogin'), date=date, grades=grades,
-                           countAverage=average, highestAverage=highestAverage, highestName=highestName, secondHighestAverage=secondHighestAverage, secondHighestName=secondHighestName, under2=under2)
+                           countAverage=average, highestAverage=highestAverage, highestName=highestName,
+                           secondHighestAverage=secondHighestAverage, secondHighestName=secondHighestName,
+                           under2=under2)
 
+
+@app.route('/addSubject', methods=['GET', 'POST'])
+def addSubject():
+    subjectForm = SubjectForm()
+    if subjectForm.validate_on_submit():
+        with open('data/grades.json', encoding='utf-8') as gradesFile:
+            grades = json.load(gradesFile)
+            subject = subjectForm.subject.data
+            grades[subject] = {
+                'term1': {'answear': [], 'quiz': [], 'test': [], 'interim': 0},
+                'term2': {'answear': [], 'quiz': [], 'test': [], 'interim': 0}
+            }
+        with open('data/grades.json', 'w', encoding='utf-8') as gradesFile:
+            json.dump(grades, gradesFile)
+            gradesFile.close()
+            flash('Dane zostały zapisane poprawnie')
+    return render_template('add-subject.html', title='Dodaj przedmiot', userLogin=session.get('userLogin'),
+                           form=subjectForm, date=date)
+
+@app.route('/addGrade', methods=['GET', 'POST'])
+def addGrade():
+    gradeForm = GradeForm()
+    with open('data/grades.json', encoding='utf-8') as gradesFile:
+        grades = json.load(gradesFile)
+        gradeForm.subject.choices = [subject for subject in grades]
+    return render_template('add-grade.html', form=gradeForm, date=date, title='Dodaj ocenę', userLogin=session.get('userLogin'))
 
 @app.errorhandler(404)
 def pageNotFound(error):
